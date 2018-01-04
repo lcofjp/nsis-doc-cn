@@ -75,4 +75,122 @@ Abort在回调函数中具有特殊意义。不同的回调函数中Abort具有�
 
 #### 2.3.5.1 逻辑代码结构
 
-代码的条件执行或循环执行可以使用StrCmp、IntCmp、IfErrors、Goto等指令来控制。然而，还可以用更便利的方式来完成。
+代码的条件执行或循环执行可以使用StrCmp、IntCmp、IfErrors、Goto等指令来控制。然而，还可以用更便利的方式来完成。LogicLib提供了一些非常简单的宏用来简化构建复杂的逻辑结构。其语法类似于其他编程语言，对于新手和高手而言都更易于使用，语法说明位于[LogicLib.nsh](http://nsis.sourceforge.net/Include/LogicLib.nsh)中。
+
+
+例如，不使用LogicLib，检查一个变量的值的实现如下：
+
+```NSIS
+StrCmp $0 'some value' 0 +3
+  MessageBox MB_OK '$$0 is some value'
+  Goto done
+StrCmp $0 'some other value' 0 +3
+  MessageBox MB_OK '$$0 is some other value'
+  Goto done
+# else
+  MessageBox MB_OK '$$0 is "$0"'
+done:
+```
+
+对于实现相同功能，如果使用了LogicLib，代码将会易于阅读和理解，如下：
+
+```NSIS
+${If} $0 == 'some value'
+  MessageBox MB_OK '$$0 is some value'
+${ElseIf} $0 == 'some other value'
+  MessageBox MB_OK '$$0 is some other value'
+${Else}
+  MessageBox MB_OK '$$0 is "$0"'
+${EndIf}
+```
+
+使用switch也可以实现相同的功能：
+
+```NSIS
+${Switch} $0
+  ${Case} 'some value'
+    MessageBox MB_OK '$$0 is some value'
+    ${Break}
+  ${Case} 'some other value'
+    MessageBox MB_OK '$$0 is some other value'
+    ${Break}
+  ${Default}
+    MessageBox MB_OK '$$0 is "$0"'
+    ${Break}
+${EndSwitch}
+```
+
+多个条件判断也是支持的，下面的代码将在$0和$1都为空的时候，给用户提示一条信息：
+
+```NSIS
+${If} $0 == ''
+${AndIf} $1 == ''
+  MessageBox MB_OK|MB_ICONSTOP 'both are empty!'
+${EndIf}
+```
+
+LogicLib去除了对标签(label)和相对跳转的依赖，防止产生标签命名冲突，也省去了每次更改脚本时要调整相对跳转偏移的麻烦。
+
+LogicLib支持常规的while、do、for循环使循环更容易实现，下面的示例使用LogicLib实现计数到5的功能：
+
+```NSIS
+StrCpy $R1 0
+${While} $R1 < 5
+  IntOp $R1 $R1 + 1
+  DetailPrint $R1
+${EndWhile}
+```
+
+```NSIS
+${For} $R1 1 5
+  DetailPrint $R1
+${Next}
+```
+
+```NSIS
+StrCpy $R1 0
+${Do}
+  IntOp $R1 $R1 + 1
+  DetailPrint $R1
+${LoopUntil} $R1 >= 5
+```
+
+使用LogicLib需要在脚本的头部添加下面一行语句：
+
+```NSIS
+!include LogicLib.nsh
+```
+
+更多的示例可以参考[LogicLib.nsi](http://nsis.sourceforge.net/Examples/LogicLib.nsi)。
+
+#### 2.3.5.2 变量(Variables)
+
+可以使用[Var](http://nsis.sourceforge.net/Docs/Chapter4.html#var)命令来声明自己的变量。变量是全局的，可以在所有的段(Section)和函数(Function)中使用。
+
+声明和使用用户变量：
+
+```NSIS
+Var BLA ;声明变量
+
+Section bla
+  StrCpy $BLA "123" ;现在你可以使用变量$BLA了
+SectionEnd
+```
+
+除此之外，还有一个栈空间，用来作为临时存储。命令[Push](http://nsis.sourceforge.net/Docs/Chapter4.html#Push)和[Pop](http://nsis.sourceforge.net/Docs/Chapter4.html#Pop)用来访问栈空间，Push向栈中增加一个值，Pop从栈中移除一个值并赋给变量。
+
+对于所有代码，有20个[寄存器变量](http://nsis.sourceforge.net/Docs/Chapter4.html#varother)($0-$9,$R0-$R9)可以用。这些静态的变量不需要声明也不会产生命名冲突。如果你想在多处代码中共用这些变量，需要在执行其他代码前把变量保存到栈中并在其他代码执行之后再从栈中恢复原来的值。
+
+在调用函数之后，这些变量还是包含以前的值。注意有多个变量时的操作顺序（后入先出）：
+
+```NSIS
+Function bla
+  Push $R0      ;保存变量
+  Push $R1
+
+    ...code... ;调用其他函数或执行某些代码
+
+  Pop $R1       ;恢复变量
+  Pop $R0
+FunctionEnd
+```
