@@ -194,3 +194,46 @@ Function bla
   Pop $R0
 FunctionEnd
 ```
+
+#### 2.3.5.3 调试脚本 (Debugging Scrips)
+
+当使用NSIS所做的工作越多，脚本就会越复杂，这会导致潜在错误的增加，尤其是处理的变量很多的时候。有一些方法可以帮助我们调试代码，我们可以使用MessageBoxs或者DetailPrint来显示变量的内容。借助DumpState插件，我们可以得到所有变量的概览。安装程序的所有行为默认会在Log窗口中打印输出。可以通过在Log窗口上右击选择“Copy Detail To Clipboard”来访问日志。还有一种方式是直接把日志写入到文件里，请参考[这里](http://nsis.sourceforge.net/Docs/AppendixD.html#dumplogtofile)。
+
+### 2.3.6 脚本执行 (Script Execution)
+
+当一个用户运行程序安装器或者卸载器的时候，页面会按着在脚本中定义的顺序进行显示。当到达instfiles页面时，被选中的组件所对应的段将按着在脚本中定义的顺序执行。如果没有组件页面显示，则会执行所有的段，此时假定所有组件都被选中且没被脚本禁止。
+
+除了段中的代码，还有回调函数中的代码，如果定义了回调函数，则他们有可能在段代码之前执行。比如，.onInit回调函数会在任何脚本中其他的代码之前执行。还有[页面回调函数](http://nsis.sourceforge.net/Docs/Chapter4.html#pagecallbacks_explain)，他们会在页面显示过程中某个时间点被执行。
+
+### 2.3.7 编译器命令 (Compiler Commands)
+
+编译器命令将会在计算机执行编译时执行，可以用于条件编译、头文件包含、执行应用程序、改变工作目录等等。最常用的功能是defines，Defines是编译时期的常量。你可以定义产品的版本号然后在脚本中使用，比如：
+
+```NSIS
+!define VERSION "1.0.3"
+Name "My Program ${VERSION}"
+OutFile "My Program Installer - ${VERSION}.exe"
+```
+
+更多关于defines的信息请参见[条件编译](http://nsis.sourceforge.net/Docs/Chapter5.html#compdefines)。
+
+另一个常用的功能是宏(macros)。宏用于在编译期间根据定义以及定义的值来插入代码，这样做的目的是对于仅有一些微小变动的代码可以被写成一段通用代码并多次重用，比如：
+
+```NSIS
+!macro MyFunc UN
+Function ${UN}MyFunc
+  Call ${UN}DoRegStuff
+  ReadRegStr $0 HKLM Software\MyProgram key
+  DetailPrint $0
+FunctionEnd
+!macroend
+
+!insertmacro MyFunc ""
+!insertmacro MyFunc "un."
+```
+
+上面定义的宏避免了为安装器和卸载器分别编写同样的代码。两个!insertmacros语句分别插入了两个函数，一个是安装器调用的MyFunc函数，一个是卸载器调用的un.MyFunc函数，这两个函数执行了相同的内容。
+
+更多信息请参见[编译期命令](http://nsis.sourceforge.net/Docs/Chapter5.html#comptime)。
+
+
