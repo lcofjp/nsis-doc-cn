@@ -236,4 +236,51 @@ FunctionEnd
 
 更多信息请参见[编译期命令](http://nsis.sourceforge.net/Docs/Chapter5.html#comptime)。
 
+## 2.4 编译器 （Compiler)
 
+创建安装包的过程中，在编写完脚本之后，就要对其进行编译了。MakeNSIS.exe就是NSIS的编译器，它将读取并解析你的脚本，最终为你生成一个安装程序。
+
+对于编译只需在.nsi文件上点击右键，然后选择"Compile NSIS Script"，此时NSIS的编译器接口程序MakeNSISW将会调用MakeNSIS去编译这个脚本文件。MakeNSISW会接收MakeNSIS的输出，并在一个窗口中展示出来，使你可以进行查阅、拷贝、测试安装包以及更多其他操作。也可以在命令行中调用makensis.exe进行操作。
+
+编译器会对脚本进行检查并给出警告或者错误提示。当有错误发生时（比如需要2个参数但只给出了1个参数），编译器将会终止编译并显示一个包含错误行号的简短错误信息。对于非严重性的错误，编译器将给出一条警告（比如在一个脚本里有两个DirText命令）。如果脚本没有错误，编译器将会生成一个用于发布程序的安装包。
+
+NSIS支持不同的压缩方式，具体可以参考[这里](http://nsis.sourceforge.net/Docs/Chapter4.html#asetcompressor)。ZLIB是默认的压缩方式，其具有速度快占用内存小的特点。LZMA是用于创建网络发布的小体积安装包的首选。BZIP2的压缩率通常介于ZLIB和LZMA之间，在需要低内存占用和快速脚本编译时很有帮助。
+
+在Linux、BSD或者Mac OS X servers系统中编译Windows安装包也是可行的。具体请参考[构建NSIS](http://nsis.sourceforge.net/Docs/AppendixG.html#build)。
+
+## 2.5 现代用户界面 （Modern UI)
+
+NSIS的一个受欢迎的用户界面是Modern User Interface。它具有最近版本windows的类似向导的界面。现代用户界面不仅仅是一个定制的资源文件，它还具有很多新的界面元素。它提供了用于描述当前步骤的白色页头、在组件页中的描述区域、欢迎页、可供用户选择运行程序或者重启系统的完成页等等。
+
+更多信息请参见[现代用户界面自述文件](http://nsis.sourceforge.net/Docs/Modern%20UI%202/Readme.html)和[现代用户界面示例](http://nsis.sourceforge.net/Examples/Modern%20UI)。
+
+## 2.6 插件
+
+NSIS支持从脚本中调用插件，插件是由C、C++、Delphi或其他编程语言生成的DLL文件，因为可以为NSIS提供更强大的代码库。
+
+可以通过下面这样的语句来进行插件的调用：
+
+```NSIS
+DLLName::FunctionName "parameter number 1" "parameter number 2" "parameter number 3"
+```
+
+插件中的每一个函数都有其各自的需求。比如函数参数，有的不需要参数，有的根据需要可能具有多个参数。例如：
+
+```NSIS
+nsExec::ExecToLog '"${NSISDIR}\makensis.exe" /CMDHELP'
+Pop $0 ; Process exit code or "error"
+InstallOptions::dialog "$PLUGINSDIR\test.ini"
+Pop $0 ; success/back/cancel/error
+NSISdl::download http://download.nullsoft.com/winamp/client/winamp291_lite.exe $R0
+Pop $0 ; "success" or a error code
+```
+
+NSIS已知的插件将会被列在编译器输出的顶部（verbose level 4)。 NSIS会在NSIS目录下的[插件文件夹](http://nsis.sourceforge.net/Plugins/)下搜索插件并列出所有的可用函数。可以使用!addplugindir指示NSIS去搜索其他的目录。
+
+NSIS发行版已经包含了很多插件。[InstallOptions](http://nsis.sourceforge.net/Docs/InstallOptions/Readme.html)是一个流行的插件，可以组合NSIS的页面命令来定制页面（参见[页面](http://nsis.sourceforge.net/Docs/Chapter4.html#pages)）。 [开始菜单插件](http://nsis.sourceforge.net/Docs/StartMenu/Readme.txt)提供了一个供用户选择开始菜单文件夹的页面。NSIS提供了很多用于不同功能的插件，可以在[文档目录](http://nsis.sourceforge.net/Docs/)下面查找帮助文件以及示例程序。同时也可以在线查找更多的插件：[NSIS Wiki](http://nsis.sf.net/)。
+
+也可以创建自己的插件，C/C++和Delphi的头文件是可以直接使用的，参阅[插件示例](http://nsis.sourceforge.net/Examples/Plugin/)学习如果编写插件。自带插件的源代码可以去源代码包中查阅。
+
+## 2.7 更多内容
+
+这个教程只是描述了NSIS的最基本功能，想了解NSIS的更多内容，需要花点时间来阅读手册的其余内容。
