@@ -256,7 +256,7 @@ NSIS的一个受欢迎的用户界面是Modern User Interface。它具有最近�
 
 ## 2.6 插件
 
-NSIS支持从脚本中调用插件，插件是由C、C++、Delphi或其他编程语言生成的DLL文件，因为可以为NSIS提供更强大的代码库。
+NSIS支持从脚本中调用插件，插件是由C、C++、Delphi或其他编程语言生成的DLL文件，可以为NSIS提供更强大的代码库。
 
 可以通过下面这样的语句来进行插件的调用：
 
@@ -279,7 +279,7 @@ NSIS已知的插件将会被列在编译器输出的顶部（verbose level 4)。
 
 NSIS发行版已经包含了很多插件。[InstallOptions](http://nsis.sourceforge.net/Docs/InstallOptions/Readme.html)是一个流行的插件，可以组合NSIS的页面命令来定制页面（参见[页面](http://nsis.sourceforge.net/Docs/Chapter4.html#pages)）。 [开始菜单插件](http://nsis.sourceforge.net/Docs/StartMenu/Readme.txt)提供了一个供用户选择开始菜单文件夹的页面。NSIS提供了很多用于不同功能的插件，可以在[文档目录](http://nsis.sourceforge.net/Docs/)下面查找帮助文件以及示例程序。同时也可以在线查找更多的插件：[NSIS Wiki](http://nsis.sf.net/)。
 
-也可以创建自己的插件，C/C++和Delphi的头文件是可以直接使用的，参阅[插件示例](http://nsis.sourceforge.net/Examples/Plugin/)学习如果编写插件。自带插件的源代码可以去源代码包中查阅。
+也可以创建自己的插件，NSIS提供了C/C++和Delphi语言可以直接使用的头文件，参阅[插件示例](http://nsis.sourceforge.net/Examples/Plugin/)学习如果编写插件。自带插件的源代码可以在源代码包中找到。
 
 ## 2.7 更多内容
 
